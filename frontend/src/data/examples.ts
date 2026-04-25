@@ -209,6 +209,62 @@ export const EXAMPLES: ExampleDef[] = [
     ],
   },
   {
+    id: 'paper-airplane-fractional',
+    shortName: 'Paper airplane (fractional)',
+    name: 'Paper airplane flight distance (2³⁻¹ fractional factorial, 24 observed runs)',
+    source: 'OREM 7377 lab — Elsaied (SMU, 2026)',
+    difficulty: 'beginner',
+    description:
+      'A 2³⁻¹ resolution-III fractional factorial with 6 replicates of each treatment (24 flights). Identify whether Paper, Design, or Nose-weight drives flight distance, then pick the winning combination.',
+    story:
+      'Three factors are hypothesised to drive paper-airplane flight distance: paper type (notebook vs printer), ' +
+      'folding design (classic dart vs glider), and nose weight (none vs paperclip). Only the four principal-fraction ' +
+      'treatments were flown (I = +ABC), but each was replicated six times across two locations and three rounds, ' +
+      'yielding 24 measured flights in inches. With a Resolution III fraction, main effects are aliased with ' +
+      'two-factor interactions — useful for screening, but be cautious interpreting individual contributions.',
+    factors: [
+      { name: 'Paper', low: 0, high: 1, units: 'Notebook / Printer' },
+      { name: 'Design', low: 0, high: 1, units: 'Dart / Glider' },
+      { name: 'Nose', low: 0, high: 1, units: 'none / paperclip' },
+    ],
+    responses: [{ name: 'Distance', units: 'in' }],
+    designType: 'fractional_factorial',
+    designOptions: {
+      fraction: 1,
+      replicates: 6,
+      randomize: false,
+      center_points: 0,
+    },
+    // Design rows from generator (4 treatments) × 6 replicates = 24 runs.
+    // Generator order per replicate: T1 (-,-,+), T3 (-,+,-), T2 (+,-,-), T4 (+,+,+)
+    // Replicates 1-3 = Location L1 / Height H1 rounds 1-3; reps 4-6 = L2 / H2 rounds 1-3.
+    observedData: [
+      [
+        // Rep 1 (L1/H1 round 1): T1, T3, T2, T4
+        39, 42, 59, 47,
+        // Rep 2 (L1/H1 round 2)
+        28, 33, 63, 45,
+        // Rep 3 (L1/H1 round 3)
+        48, 40, 69, 41,
+        // Rep 4 (L2/H2 round 1)
+        32, 18.2, 12.6, 73.3,
+        // Rep 5 (L2/H2 round 2) — note T2 = 228.5 hit a wall, T1 = 81 hit a ceiling
+        81, 26.5, 228.5, 41.5,
+        // Rep 6 (L2/H2 round 3) — T1 = 99.5 hit a ceiling
+        99.5, 118.6, 24.9, 38.3,
+      ],
+    ],
+    goals: [
+      { name: 'Distance', goal: 'maximize', lower: 10, upper: 250, importance: 5 },
+    ],
+    takeaways: [
+      'Open Analysis → ANOVA: with only 3 factors and a half fraction, all 3 main effects are estimable but each is aliased with a two-factor interaction (A↔BC, B↔AC, C↔AB)',
+      'Diagnostics will flag the two ceiling-strike runs in Replicate 5 — a real experiment would discard or rerun them',
+      'Optimize for maximum distance — the winning corner under the principal fraction is Printer + Glider + Paperclip (T4), but the L2 noise makes the estimate uncertain',
+      'Compare with the larger 2⁴ factorial example to see how more runs and a 4th factor (environment) sharpen the conclusions',
+    ],
+  },
+  {
     id: 'paper-airplane-distance',
     shortName: 'Paper airplane',
     name: 'Paper airplane flight distance (2⁴ factorial, 64 observed runs)',
