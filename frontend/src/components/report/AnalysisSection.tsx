@@ -44,7 +44,7 @@ export function AnalysisSection({
 
       <ReportSubBlock>
         <h3 className="report-h3">ANOVA</h3>
-        <AnovaTable rows={a.anova} />
+        <AnovaTable rows={a.anova} factors={project.factors} />
       </ReportSubBlock>
 
       {entry.narrative && (
@@ -56,7 +56,7 @@ export function AnalysisSection({
 
       <ReportSubBlock>
         <h3 className="report-h3">Coefficients (coded units)</h3>
-        <CoefficientsTable rows={a.coefficients_coded} />
+        <CoefficientsTable rows={a.coefficients_coded} factors={project.factors} />
       </ReportSubBlock>
 
       <ReportSubBlock>

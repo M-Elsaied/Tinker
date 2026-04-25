@@ -216,6 +216,7 @@ export function AnalysisPage() {
         narrative={narrative}
         bc={bc}
         onComputeBoxCox={refreshBoxCox}
+        factors={project.factors}
       />
     )
   } else if (activeTab === 'diagnostics') {
@@ -357,12 +358,13 @@ function ConfigureTab({
 }
 
 function AnovaTab({
-  analysis, narrative, bc, onComputeBoxCox,
+  analysis, narrative, bc, onComputeBoxCox, factors,
 }: {
   analysis?: import('@/types').AnalysisResponse
   narrative: NarrativeResponse | null
   bc: BoxCoxResponse | null
   onComputeBoxCox: () => void
+  factors: import('@/types').Factor[]
 }) {
   if (!analysis) {
     return (
@@ -382,7 +384,7 @@ function AnovaTab({
             <CardTitle className="text-sm">ANOVA — analysis of variance</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <AnovaTable rows={analysis.anova} />
+            <AnovaTable rows={analysis.anova} factors={factors} />
           </CardContent>
         </Card>
 
@@ -408,7 +410,7 @@ function AnovaTab({
               </TabsList>
               <TabsContent value="coded">
                 <div className="-mx-3">
-                  <CoefficientsTable rows={analysis.coefficients_coded} />
+                  <CoefficientsTable rows={analysis.coefficients_coded} factors={factors} />
                 </div>
               </TabsContent>
               <TabsContent value="eq-coded">

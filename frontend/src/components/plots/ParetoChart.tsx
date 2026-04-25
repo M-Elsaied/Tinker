@@ -1,4 +1,5 @@
 import { Plot, PLOT_CONFIG, PLOT_LAYOUT_BASE } from './plotly'
+import { safeTermLabel, type FactorLike } from '@/lib/termLabel'
 import type { CoefficientRow } from '@/types'
 
 export function ParetoChart({
@@ -6,17 +7,19 @@ export function ParetoChart({
   alpha = 0.05,
   dfResid,
   tValues,
+  factors,
 }: {
   coefficients: CoefficientRow[]
   alpha?: number
   dfResid: number
   tValues?: number[]
+  factors?: FactorLike[]
 }) {
   // Skip the intercept
   const data = coefficients
     .slice(1)
     .map((c, i) => ({
-      term: c.term,
+      term: safeTermLabel(c.term, factors),
       t: tValues ? tValues[i] : c.t_value ?? 0,
     }))
     .filter((d) => Number.isFinite(d.t))

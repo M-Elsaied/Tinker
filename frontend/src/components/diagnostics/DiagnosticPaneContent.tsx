@@ -60,7 +60,7 @@ export function DiagnosticPaneContent({
     case 'box-cox':
       return bc ? <BoxCoxPlot data={bc} /> : <Empty msg="Compute Box-Cox first." />
     default:
-      return <ParetoChart coefficients={analysis.coefficients_coded} dfResid={analysis.df_residual} />
+      return <ParetoChart coefficients={analysis.coefficients_coded} dfResid={analysis.df_residual} factors={factors} />
   }
 }
 

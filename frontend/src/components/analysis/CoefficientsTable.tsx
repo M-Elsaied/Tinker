@@ -2,16 +2,19 @@ import { Table, TBody, TD, TH, THead, TR } from '@/components/ui/table'
 import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { fmt, fmtP, pStars } from '@/lib/utils'
 import { cn } from '@/lib/utils'
+import { safeTermLabel, type FactorLike } from '@/lib/termLabel'
 import type { CoefficientRow } from '@/types'
 
 export function CoefficientsTable({
   rows,
   alpha = 0.05,
   showStats = true,
+  factors,
 }: {
   rows: CoefficientRow[]
   alpha?: number
   showStats?: boolean
+  factors?: FactorLike[]
 }) {
   return (
     <Table>
@@ -31,7 +34,7 @@ export function CoefficientsTable({
           const sig = r.p_value !== null && r.p_value !== undefined && r.p_value < alpha
           return (
             <TR key={i} className={cn(sig && 'bg-sig-muted/30')}>
-              <TD className={cn('mono', i === 0 && 'font-semibold')}>{r.term}</TD>
+              <TD className={cn('mono', i === 0 && 'font-semibold')}>{safeTermLabel(r.term, factors)}</TD>
               <TD className="text-right mono">{fmt(r.estimate, 5)}</TD>
               {showStats && (
                 <TD className="text-right mono text-muted-foreground">

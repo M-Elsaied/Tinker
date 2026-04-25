@@ -2,11 +2,20 @@ import { Table, TBody, TD, TH, THead, TR } from '@/components/ui/table'
 import { GlossaryTerm } from '@/components/ui/glossary-term'
 import { fmt, fmtP, pStars } from '@/lib/utils'
 import { cn } from '@/lib/utils'
+import { safeTermLabel, type FactorLike } from '@/lib/termLabel'
 import type { AnovaTermRow } from '@/types'
 
 const SECTION_ROWS = new Set(['Model', 'Residual', 'Lack of Fit', 'Pure Error', 'Cor Total'])
 
-export function AnovaTable({ rows, alpha = 0.05 }: { rows: AnovaTermRow[]; alpha?: number }) {
+export function AnovaTable({
+  rows,
+  alpha = 0.05,
+  factors,
+}: {
+  rows: AnovaTermRow[]
+  alpha?: number
+  factors?: FactorLike[]
+}) {
   return (
     <Table>
       <THead>
@@ -32,7 +41,7 @@ export function AnovaTable({ rows, alpha = 0.05 }: { rows: AnovaTermRow[]; alpha
                 sig && !isSection && 'bg-sig-muted/40',
               )}
             >
-              <TD className={cn(isSection && 'font-semibold')}>{r.source}</TD>
+              <TD className={cn(isSection && 'font-semibold')}>{safeTermLabel(r.source, factors)}</TD>
               <TD className="text-right mono">{fmt(r.sum_sq, 4)}</TD>
               <TD className="text-right mono">{r.df}</TD>
               <TD className="text-right mono">
