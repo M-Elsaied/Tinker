@@ -39,8 +39,8 @@ def predict_point(
         pt_coded = np.array([point.get(f.name, 0.0) for f in factors])
 
     Xp = build_design_matrix(pt_coded.reshape(1, -1), selected_terms, codes)
-    yhat = float(Xp @ fit["beta"])
-    var_mean = float(Xp @ fit["XtX_inv"] @ Xp.T) * fit["mse"]
+    yhat = float((Xp @ fit["beta"]).item())
+    var_mean = float((Xp @ fit["XtX_inv"] @ Xp.T).item()) * fit["mse"]
     se_mean = float(np.sqrt(max(var_mean, 0)))
     se_pred = float(np.sqrt(max(var_mean + fit["mse"], 0)))
 
@@ -119,8 +119,8 @@ def profiler_curve(
         row = held.copy()
         row[f_idx] = v
         Xrow = build_design_matrix(row.reshape(1, -1), selected_terms, codes)
-        pred = float(Xrow @ fit["beta"])
-        var_mean = float(Xrow @ fit["XtX_inv"] @ Xrow.T) * fit["mse"]
+        pred = float((Xrow @ fit["beta"]).item())
+        var_mean = float((Xrow @ fit["XtX_inv"] @ Xrow.T).item()) * fit["mse"]
         se = float(np.sqrt(max(var_mean, 0)))
         ys.append(pred)
         ci_lo.append(pred - t_crit * se)
@@ -177,7 +177,7 @@ def cube_predictions(
                 row[indices[1]] = sy
                 row[indices[2]] = sz
                 Xrow = build_design_matrix(row.reshape(1, -1), selected_terms, codes)
-                pred = float(Xrow @ fit["beta"])
+                pred = float((Xrow @ fit["beta"]).item())
                 # Convert to actual for display
                 actual_x = []
                 for k, idx in enumerate(indices):

@@ -125,7 +125,7 @@ def graphical_overlay(
                 row[x_idx] = xv
                 row[y_idx] = yv
                 Xrow = build_design_matrix(row.reshape(1, -1), goal.selected_terms, codes)
-                z[j, i] = float(Xrow @ beta)  # rows=y, cols=x
+                z[j, i] = float((Xrow @ beta).item())  # rows=y, cols=x
 
         # Feasibility mask
         if goal.goal == GoalType.MINIMIZE:
@@ -193,7 +193,7 @@ def optimize(
     def predict(name: str, x: np.ndarray) -> float:
         info = fits[name]
         Xrow = build_design_matrix(x.reshape(1, -1), info["terms"], codes)
-        return float(Xrow @ info["fit"]["beta"])
+        return float((Xrow @ info["fit"]["beta"]).item())
 
     def neg_composite(x: np.ndarray) -> float:
         vals = {name: predict(name, x) for name in fits}

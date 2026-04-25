@@ -119,9 +119,9 @@ def predict_grid(
                 row[x_idx] = xv
                 row[y_idx] = yv
                 Xrow = build_design_matrix(row.reshape(1, -1), selected_terms, codes)
-                pred = float(Xrow @ beta)
+                pred = float((Xrow @ beta).item())
                 z[j, i] = pred  # rows=y, cols=x for plotly contour convention
-                var = float(Xrow @ fit["XtX_inv"] @ Xrow.T) * fit["mse"]
+                var = float((Xrow @ fit["XtX_inv"] @ Xrow.T).item()) * fit["mse"]
                 z_se[j, i] = float(np.sqrt(max(var, 0)))
 
         x_actual_grid = (
@@ -142,8 +142,8 @@ def predict_grid(
         held_y_coded = held_coded[y_idx]
         cur_row = held_coded.copy()
         Xcur = build_design_matrix(cur_row.reshape(1, -1), selected_terms, codes)
-        cur_pred = float(Xcur @ beta)
-        cur_se = float(np.sqrt(max(float(Xcur @ fit["XtX_inv"] @ Xcur.T) * fit["mse"], 0)))
+        cur_pred = float((Xcur @ beta).item())
+        cur_se = float(np.sqrt(max(float((Xcur @ fit["XtX_inv"] @ Xcur.T).item()) * fit["mse"], 0)))
         cur_x = held_x_coded * (factors[x_idx].high - factors[x_idx].low) / 2 + (factors[x_idx].high + factors[x_idx].low) / 2
         cur_y = held_y_coded * (factors[y_idx].high - factors[y_idx].low) / 2 + (factors[y_idx].high + factors[y_idx].low) / 2
         current = {
@@ -171,7 +171,7 @@ def predict_grid(
             row = held_coded.copy()
             row[i] = v
             Xrow = build_design_matrix(row.reshape(1, -1), selected_terms, codes)
-            preds.append(float(Xrow @ beta))
+            preds.append(float((Xrow @ beta).item()))
         perturbation[f.name] = {
             "x": grid_coded.tolist(),
             "y": preds,
