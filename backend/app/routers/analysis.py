@@ -63,3 +63,10 @@ def predict_grid(req: PredictionGridRequest) -> PredictionGridResponse:
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        import traceback
+        tb = traceback.format_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=f"{type(e).__name__}: {e}\n{tb}",
+        ) from e
