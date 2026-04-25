@@ -1,5 +1,5 @@
 ---
-title: DOE Lab
+title: Tinker
 emoji: 🧪
 colorFrom: blue
 colorTo: indigo
@@ -8,44 +8,110 @@ app_port: 7860
 pinned: false
 ---
 
-# DOE Lab
+# Tinker — Design of Experiments, in your browser
 
-A free, open-source web application for **Design of Experiments (DOE)** — a modern, browser-based alternative to commercial tools like Stat-Ease Design-Expert.
+[![Live demo](https://img.shields.io/badge/demo-melsaied1--tinker.hf.space-blue?style=flat-square&logo=huggingface)](https://melsaied1-tinker.hf.space)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg?style=flat-square)](LICENSE)
+[![Built with FastAPI](https://img.shields.io/badge/backend-FastAPI-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com)
+[![Built with React](https://img.shields.io/badge/frontend-React%2018-61dafb?style=flat-square&logo=react)](https://react.dev)
+[![Docker](https://img.shields.io/badge/deploy-Docker-2496ED?style=flat-square&logo=docker)](Dockerfile)
 
-DOE Lab walks an experimenter end-to-end: pick a design, enter the response data, fit and diagnose the model, optimize across multiple responses, and export a publication-quality PDF report. Everything runs locally in the browser plus a small FastAPI backend — no account required, your data never leaves your machine.
+A free, open-source workbench for **Design of Experiments (DOE)** — an alternative to Stat-Ease Design-Expert that runs in any browser. Pick a design, enter the data, fit and diagnose the model, optimize across multiple responses, and export a publication-ready PDF report.
 
-> Built for engineering and statistics students, lab researchers, and process engineers who need a serious DOE workbench without paying for a license.
-
----
-
-## Highlights
-
-- **Every common design type** — full / fractional factorial, Plackett–Burman, central composite (CCD), Box–Behnken (BBD), definitive screening, D / I-optimal, mixture, Latin hypercube.
-- **Full statistical pipeline** — ANOVA with lack-of-fit, multiple model orders, VIF, R² / Adj-R² / Pred-R² / Adequate Precision / PRESS, Box–Cox power transforms, and the final equation in both coded and actual units.
-- **Rich diagnostics** — normal probability plot, studentized residuals vs predicted / run order / factors, leverage, Cook's distance, Shapiro–Wilk normality, Pareto chart of effects.
-- **Interactive visualization** — Plotly-powered 2-D contours with design-point overlay, rotatable 3-D response surfaces, interaction plots, perturbation plots, Box–Cox log-likelihood plot.
-- **Multi-response optimization** — Derringer–Suich desirability with per-response goal (min / max / target / range), weight, and importance; ranked solutions with desirability ramps and a sweet-spot overlay.
-- **Comprehensive report export** — one-click A4 PDF with cover, executive summary, design, data, per-response analysis, diagnostics, optimization, and a glossary appendix. Plot snapshots use Plotly's native `toImage` at 2× DPI for crisp output.
-- **Auto-narrative interpretation** — every analysis section includes plain-language paragraphs explaining what the numbers mean, in the style of Design-Expert's analysis summary.
-- **Modern, polished UI** — light / dark theme with system follow, Linear-style command palette (`⌘K`), Vim-style `g+key` navigation, sparklines, glossary popovers for stats jargon, and full keyboard accessibility.
-- **Local-first** — IndexedDB persistence (via Dexie). Projects survive refreshes, work offline, and never sync to a server.
-- **Built-in worked examples** — chemical-yield optimization (CCD), filtration screening (fractional factorial), and a multi-response cake-recipe (BBD with Moistness × Sweetness).
+> 🚀 **Try it live:** [melsaied1-tinker.hf.space](https://melsaied1-tinker.hf.space)
 
 ---
+
+## Why Tinker?
+
+Commercial DOE software (Design-Expert, JMP, Minitab) is powerful but costs $1,000–$2,000 per seat — out of reach for most students, hobbyists, and small labs. Tinker provides the same end-to-end workflow in a modern web app, free and open source. Data stays on your machine (IndexedDB, no account), and the entire pipeline — design generation, regression, ANOVA, diagnostics, optimization, reporting — is implemented from open primitives (NumPy, SciPy, statsmodels, pyDOE3).
+
+## Features
+
+### Design generation
+- Full and fractional factorial (2ᵏ, 2ᵏ⁻ᵖ) with custom generators
+- Plackett–Burman screening
+- Central composite (CCD): rotatable, face-centered, inscribed
+- Box–Behnken (BBD)
+- Definitive screening designs (DSD)
+- D- and I-optimal designs (coordinate exchange)
+- Mixture designs (simplex lattice / centroid)
+- Latin hypercube sampling
+- Center points, blocking, replication, randomized run order
+
+### Statistical analysis
+- ANOVA with sums-of-squares decomposition and per-term significance
+- Linear, two-factor interaction, quadratic, and cubic models
+- Lack-of-fit testing using replicates
+- Fit Summary table comparing candidate model orders
+- Variance Inflation Factors (VIF), R², adjusted R², predicted R², adequate precision, PRESS
+- Box–Cox transformation analysis with recommendation
+- Final equations in both coded and actual units
+
+### Diagnostics
+- Normal probability plot of residuals
+- Studentized residuals vs predicted, run order, and individual factors
+- Leverage and Cook's distance
+- DFFITS plot
+- Shapiro–Wilk normality test
+- Pareto chart of effects with t-critical reference line
+
+### Visualization
+- Interactive 2D contour plots with overlaid design points
+- Rotatable 3D response-surface plots
+- Two-factor interaction plots
+- Perturbation (one-factor-at-a-time) plots
+- Box–Cox log-likelihood plot
+
+### Optimization
+- Multi-response numerical optimization
+- Derringer–Suich desirability functions (minimize / maximize / target / range)
+- Per-response weight and importance
+- Ranked solution list with desirability ramps and a sweet-spot overlay
+
+### Reporting
+- One-click A4 PDF export with cover, executive summary, design, data, per-response analysis, diagnostics, optimization, and a glossary appendix
+- Plot snapshots use Plotly's native `toImage` at 2× DPI for crisp, vector-quality figures
+- Auto-generated narrative paragraphs explain every analysis section in plain language
+
+### Workflow
+- Local-first persistence in IndexedDB — works offline, survives refreshes, never leaves your browser
+- CSV / Excel import and export
+- Spreadsheet-style data entry with paste support
+- Light / dark theme with system follow
+- Linear-style command palette (`⌘K`) and Vim-style `g+key` navigation
+- Glossary popovers for every statistical term
+
+## Built-in worked examples
+
+Open from the home page — each loads a fully populated project so you can explore the entire workflow without entering data.
+
+| Example | Design | Responses | Use case |
+|---|---|---|---|
+| Chemical reaction yield | Central composite (CCD) | Yield | RSM, optimization |
+| Filtration screening | 2⁴⁻¹ fractional factorial | Filtration rate | Effect screening |
+| Cake recipe | Box–Behnken (BBD) | Moistness, Sweetness | Multi-response optimization |
+| Paper airplane (fractional) | 2³⁻¹ resolution-III | Distance | Replicated screening, outlier diagnostics |
+| Paper airplane (full) | 2⁴ full factorial | Distance | Main effects + interactions |
 
 ## Quick start
 
-### One command (Docker)
+### Try it online
+No install needed — open the live demo at **<https://melsaied1-tinker.hf.space>**.
+
+### Run locally with Docker
 
 ```bash
+git clone https://github.com/M-Elsaied/Tinker.git
+cd Tinker
 docker compose up --build
 ```
 
 Open <http://localhost:8080>. The image bundles the built React SPA into the FastAPI container, so a single service serves both the UI and the API.
 
-### Local development
+### Run for development
 
-**Backend** (Python 3.11+):
+**Backend** (Python 3.12+):
 
 ```bash
 cd backend
@@ -64,178 +130,150 @@ npm install
 npm run dev
 ```
 
-Vite serves at <http://localhost:5173> and proxies `/api/*` to the backend at port 8001. Open the URL — the home page lists the worked examples and a "New design" button.
-
----
+Vite serves at <http://localhost:5173> and proxies `/api/*` to the backend at port 8001.
 
 ## Architecture
 
+Tinker is a single-image two-tier application:
+
+- **Backend** — FastAPI + Pydantic v2, with NumPy / SciPy / statsmodels / pyDOE3 doing the statistical heavy lifting. NaN-safe JSON encoder so scipy edge cases never crash the API.
+- **Frontend** — React 18 + TypeScript + Vite, Tailwind CSS, Radix UI primitives, Plotly.js, framer-motion, Zustand, Dexie (IndexedDB), TanStack Table, cmdk, html2pdf.js.
+
 ```
-Project/
-├── Dockerfile                       # Multi-stage: node builds SPA → Python serves both
+Tinker/
+├── Dockerfile                 # Multi-stage: Node builds the SPA → Python serves both
 ├── docker-compose.yml
-├── backend/                         # FastAPI + numpy / scipy / statsmodels / pyDOE3
+├── backend/
 │   ├── requirements.txt
 │   └── app/
-│       ├── main.py                  # API entry, NaN-safe JSON encoder, SPA static mount
-│       ├── routers/                 # designs, analysis, diagnostics, optimization,
-│       │                            # transforms, narrative, effects, prediction,
-│       │                            # evaluation, augment
-│       ├── services/                # design_generators/, analysis_engine,
-│       │                            # diagnostics_engine, optimization_engine,
-│       │                            # prediction_engine, transforms, narrative_engine
-│       └── models/                  # Pydantic request / response schemas
-└── frontend/                        # React 18 + Vite + TypeScript + Tailwind + Plotly
+│       ├── main.py            # FastAPI entry, NaN-safe JSON encoder, SPA static mount
+│       ├── routers/           # designs, analysis, diagnostics, optimization,
+│       │                      # transforms, narrative, effects, prediction,
+│       │                      # evaluation, augment
+│       ├── services/          # design generators, analysis_engine, diagnostics_engine,
+│       │                      # optimization_engine, prediction_engine, transforms,
+│       │                      # narrative_engine
+│       └── models/            # Pydantic request / response schemas
+└── frontend/
     └── src/
-        ├── pages/                   # Home, NewDesign, Design, Data, Analysis,
-        │                            # Optimize, Profiler, Confirmation, Evaluation,
-        │                            # Report
-        ├── components/
-        │   ├── ui/                  # Button, Card, Table, Tabs, Tooltip, Popover…
-        │   ├── layout/              # AppShell, Sidebar, RequireProject
-        │   ├── wizard/              # Multi-step DesignWizard
-        │   ├── data/                # DataGrid, ImportExport (CSV / Excel)
-        │   ├── analysis/            # AnovaTable, ModelSummary, FitSummary,
-        │   │                        # CoefficientsTable
-        │   ├── plots/               # Contour, Surface3D, NormalProb, Residuals,
-        │   │                        # Cook's, BoxCox, Pareto, Perturbation
-        │   ├── optimization/        # Goals editor, solutions table, sweet-spot map
-        │   ├── narrative/           # NarrativeBlock, GlossaryPopover
-        │   ├── command/             # cmdk palette + commands + ShortcutOverlay
-        │   └── report/              # CoverPage, ExecutiveSummary, DesignSection,
-        │                            # DataSection, AnalysisSection, OptimizationSection,
-        │                            # NotesSection, GlossaryAppendix
-        ├── stores/                  # Zustand projectStore + uiStore
-        ├── services/                # API client + IndexedDB (Dexie)
-        ├── lib/                     # insights, reportFetcher, pdfExport,
-        │                            # plotlyToImage, utils, toast
-        ├── hooks/                   # useTheme, useShortcuts, usePlotLayout
-        └── data/                    # examples, glossary
+        ├── pages/             # Home, NewDesign, Design, Data, Analysis, Optimize,
+        │                      # Profiler, Confirmation, Evaluation, Report
+        ├── components/        # ui/, layout/, wizard/, data/, analysis/, plots/,
+        │                      # optimization/, narrative/, command/, report/
+        ├── stores/            # Zustand projectStore + uiStore
+        ├── services/          # API client + IndexedDB
+        ├── lib/               # insights, reportFetcher, pdfExport, plotlyToImage
+        ├── hooks/             # useTheme, useShortcuts, usePlotLayout
+        └── data/              # examples, glossary
 ```
 
-### Backend at a glance
+### REST API
 
-The FastAPI app exposes everything under `/api/*`:
+All endpoints live under `/api/*`:
 
-| Route prefix              | Purpose                                                |
-|---------------------------|--------------------------------------------------------|
-| `/api/designs`            | Generate / augment design matrices                     |
-| `/api/analysis`           | Run regression + ANOVA, fit summary, effects           |
-| `/api/diagnostics`        | Residual, leverage, Cook's, Shapiro–Wilk               |
-| `/api/transforms`         | Box–Cox power transform analysis                       |
-| `/api/optimization`       | Numerical optimization (Derringer–Suich desirability)  |
-| `/api/prediction`         | Contour / surface grid evaluation                      |
-| `/api/evaluation`         | Design quality metrics (D-, A-, G-, I-efficiency, FDS) |
-| `/api/narrative`          | Auto-generated interpretation paragraphs               |
-| `/api/health`             | Liveness probe                                         |
+| Route prefix | Purpose |
+|---|---|
+| `/api/designs` | Generate and augment design matrices |
+| `/api/analysis` | Regression, ANOVA, fit summary, effects |
+| `/api/diagnostics` | Residual, leverage, Cook's distance, Shapiro–Wilk |
+| `/api/transforms` | Box–Cox power transform analysis |
+| `/api/optimization` | Numerical optimization (Derringer–Suich desirability) |
+| `/api/prediction` | Contour and surface grid evaluation |
+| `/api/evaluation` | Design quality metrics (D-, A-, G-, I-efficiency, FDS) |
+| `/api/narrative` | Auto-generated interpretation paragraphs |
+| `/api/health` | Liveness probe |
 
-Heavy maths uses `numpy`, `scipy`, `statsmodels`, and `pyDOE3`. NaN/Inf values from scipy are scrubbed by a custom `SafeJSONResponse` so JSON encoding never fails.
-
-### Frontend at a glance
-
-- **State**: Zustand stores persisted to IndexedDB via Dexie. The active project survives refresh and works offline.
-- **Routing**: React Router with `framer-motion` page transitions; deep links work for every section.
-- **Plots**: `react-plotly.js` with a shared `usePlotLayout` hook that re-themes plots when the user toggles dark mode.
-- **Tables**: `@tanstack/react-table` wrapped in custom primitives.
-- **Command palette**: `cmdk` mounted globally, opens on `⌘K` / `Ctrl+K`. Vim-style `g+letter` chords for fast navigation (`g h` Home, `g d` Design, `g a` Analysis, `g o` Optimize, `g r` Report, etc.).
-- **PDF export**: `html2pdf.js` lazy-imported on click. Before snapshotting, every Plotly node is converted to a 2× PNG via `Plotly.toImage`, so the resulting PDF has crisp vector-quality charts instead of blurry rasters.
-
----
-
-## Worked examples
-
-Open from the home page — each loads a fully populated project so you can explore every feature without entering data first.
-
-| Example                       | Design                       | Responses                |
-|-------------------------------|------------------------------|--------------------------|
-| Chemical reaction yield       | Central composite (CCD)      | Yield (%)                |
-| Filtration screening          | 2⁵⁻¹ fractional factorial    | Filtration time (s)      |
-| Cake recipe (multi-response)  | Box–Behnken (BBD)            | Moistness, Sweetness     |
-
----
+Interactive API docs are auto-generated by FastAPI at `/docs`.
 
 ## Keyboard shortcuts
 
-| Keys              | Action                       |
-|-------------------|------------------------------|
-| `⌘K` / `Ctrl+K`   | Command palette              |
-| `?`               | Show all shortcuts           |
-| `g h`             | Home                         |
-| `g n`             | New design                   |
-| `g d`             | Design overview              |
-| `g a`             | Analysis                     |
-| `g o`             | Optimization                 |
-| `g r`             | Report                       |
-| `⌘ /`             | Toggle dark / light theme    |
-| `⌘P`              | Print current page           |
-| `⌘ shift E`       | Export report PDF            |
-| `Esc`             | Close palettes / dialogs     |
+| Keys | Action |
+|---|---|
+| `⌘K` / `Ctrl+K` | Command palette |
+| `?` | Show all shortcuts |
+| `g h` | Home |
+| `g n` | New design |
+| `g d` | Design overview |
+| `g a` | Analysis |
+| `g o` | Optimization |
+| `g r` | Report |
+| `⌘ /` | Toggle dark / light theme |
+| `⌘P` | Print current page |
+| `⌘ Shift E` | Export report PDF |
+| `Esc` | Close palettes / dialogs |
 
----
+## Comparison to commercial DOE software
 
-## Comparison to Design-Expert
-
-| Feature                              | Design-Expert | DOE Lab |
-|--------------------------------------|:-------------:|:-------:|
-| Full / fractional factorial          | ✅            | ✅       |
-| Plackett–Burman                      | ✅            | ✅       |
-| CCD (rotatable / face / inscribed)   | ✅            | ✅       |
-| Box–Behnken                          | ✅            | ✅       |
-| Definitive screening                 | ✅            | ✅       |
-| D / I-optimal                        | ✅            | ✅       |
-| Mixture designs                      | ✅            | ✅       |
-| Latin hypercube                      | ✅            | ✅       |
-| ANOVA + lack-of-fit                  | ✅            | ✅       |
-| Box–Cox transformations              | ✅            | ✅       |
-| Contour, 3-D surface, perturbation   | ✅            | ✅       |
-| Desirability optimization            | ✅            | ✅       |
-| Auto-narrative interpretation        | ✅            | ✅       |
-| Comprehensive PDF report             | ✅            | ✅       |
-| Split-plot                           | ✅            | ⏳       |
-| Cost                                 | $1,995        | **Free** |
-
----
+| Feature | Design-Expert | JMP | Tinker |
+|---|:---:|:---:|:---:|
+| Full / fractional factorial | ✅ | ✅ | ✅ |
+| Plackett–Burman | ✅ | ✅ | ✅ |
+| CCD (rotatable / face / inscribed) | ✅ | ✅ | ✅ |
+| Box–Behnken | ✅ | ✅ | ✅ |
+| Definitive screening | ✅ | ✅ | ✅ |
+| D- / I-optimal | ✅ | ✅ | ✅ |
+| Mixture designs | ✅ | ✅ | ✅ |
+| Latin hypercube | ✅ | ✅ | ✅ |
+| ANOVA + lack-of-fit | ✅ | ✅ | ✅ |
+| Box–Cox transformations | ✅ | ✅ | ✅ |
+| Contour, 3D surface, perturbation | ✅ | ✅ | ✅ |
+| Desirability optimization | ✅ | ✅ | ✅ |
+| Auto-narrative interpretation | ✅ | ⚠️ | ✅ |
+| Comprehensive PDF report | ✅ | ✅ | ✅ |
+| Local-first / offline | ❌ | ❌ | ✅ |
+| Open source | ❌ | ❌ | ✅ |
+| Cost (per seat) | $1,995 | $1,800+ | **Free** |
 
 ## Deployment
 
-DOE Lab is a single Docker image (multi-stage build: Node compiles the SPA, Python serves it together with the FastAPI API). It deploys unchanged to:
+The same Dockerfile builds an image that runs unchanged on:
 
-- **Hugging Face Spaces** (Docker SDK) — recommended for a free always-on host. Push this repo to a Space and the included `README.md` frontmatter configures the build.
+- **Hugging Face Spaces** (Docker SDK) — recommended free always-on host. Push the repo to a Space; the YAML frontmatter at the top of this README configures the build.
 - **Render** — Web Service → Docker, root directory = repo root.
 - **Fly.io** — `fly launch` picks up the Dockerfile.
-- **Self-host** — `docker compose up --build` on any Linux/macOS/Windows host with Docker.
+- **Self-hosted** — `docker compose up --build` on any host with Docker.
 
 The container exposes port `7860` by default (Hugging Face convention) and honors `$PORT`.
 
----
+## Roadmap
 
-## Development scripts
+- [x] Comprehensive PDF report export
+- [x] Multi-response desirability optimization
+- [x] Light / dark theme + command palette
+- [x] Built-in worked examples (5)
+- [ ] Split-plot designs
+- [ ] Bayesian model averaging for screening
+- [ ] Direct Excel `.xlsx` import (currently CSV via paste)
+- [ ] Project sharing via signed export link
 
-From `frontend/`:
+## Contributing
 
-| Script              | Action                              |
-|---------------------|-------------------------------------|
-| `npm run dev`       | Vite dev server with HMR            |
-| `npm run build`     | Type-check + production build       |
-| `npm run preview`   | Serve the production build locally  |
+Issues and pull requests welcome. The codebase is intentionally small enough to read end-to-end in an afternoon.
 
-From `backend/`:
+For larger features please open an issue first to discuss the design. Useful entry points:
 
-| Command                                       | Action                |
-|-----------------------------------------------|-----------------------|
-| `uvicorn app.main:app --reload --port 8001`   | Dev server with reload|
-| `python -m pytest`                            | Run tests             |
+- Design generation: `backend/app/services/design_generators/`
+- Statistical engines: `backend/app/services/analysis_engine.py`, `optimization_engine.py`
+- UI primitives: `frontend/src/components/ui/`
+- Worked examples: `frontend/src/data/examples.ts`
 
----
+## Citation
 
-## Tech stack
+If you use Tinker in academic work:
 
-**Backend**: Python 3.12, FastAPI, Uvicorn, Pydantic v2, NumPy, SciPy, statsmodels, pandas, pyDOE3.
-
-**Frontend**: React 18, TypeScript 5, Vite 5, Tailwind CSS 3, Radix UI primitives, Plotly.js, framer-motion, Zustand, Dexie (IndexedDB), TanStack Table, cmdk, sonner, lucide-react, html2pdf.js, xlsx, papaparse.
-
----
+```bibtex
+@software{tinker_doe,
+  title  = {Tinker: an open-source web workbench for Design of Experiments},
+  author = {Elsaied, Mohamed},
+  year   = {2026},
+  url    = {https://github.com/M-Elsaied/Tinker}
+}
+```
 
 ## License
 
-MIT — free for academic, commercial, and personal use.
+MIT — free for academic, commercial, and personal use. See [LICENSE](LICENSE).
+
+---
+
+<sub>Built with FastAPI, React, Plotly, and a healthy disrespect for $1,995 license fees.</sub>
