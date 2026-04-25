@@ -215,13 +215,18 @@ export const EXAMPLES: ExampleDef[] = [
     source: 'OREM 7377 lab — Elsaied (SMU, 2026)',
     difficulty: 'beginner',
     description:
-      'A 2³⁻¹ resolution-III fractional factorial with 6 replicates of each treatment (24 flights). Identify whether Paper, Design, or Nose-weight drives flight distance, then pick the winning combination.',
+      'A 2³⁻¹ resolution-III fractional factorial with 6 replicates of each treatment (24 flights), spread over two location/height blocks. A teaching example for assignable-cause investigation, blocking limitations, and the value of plain-English run notes alongside numeric data.',
     story:
       'Three factors are hypothesised to drive paper-airplane flight distance: paper type (notebook vs printer), ' +
       'folding design (classic dart vs glider), and nose weight (none vs paperclip). Only the four principal-fraction ' +
-      'treatments were flown (I = +ABC), but each was replicated six times across two locations and three rounds, ' +
-      'yielding 24 measured flights in inches. With a Resolution III fraction, main effects are aliased with ' +
-      'two-factor interactions — useful for screening, but be cautious interpreting individual contributions.',
+      'treatments were flown (defining relation I = +ABC), but each was replicated six times — three rounds in ' +
+      'Location 1 / Height 1 and three rounds in Location 2 / Height 2 — for 24 measured flights in inches.\n\n' +
+      'Two things make this a useful teaching example. First, four of the 24 runs have *assignable causes* logged ' +
+      'in the experimenter\'s notebook (paperclip detached, hit ceiling, hit wall) — a perfect test bed for the ' +
+      'difference between a statistical outlier and a known special-cause event. Second, Location and Height are ' +
+      'fully confounded and should be modelled as a single block; Tinker does not yet expose an explicit block ' +
+      'factor, so the analysis underestimates how much of the L1 → L2 variance is structural. The takeaways below ' +
+      'spell out how to read the report with that limitation in mind.',
     factors: [
       { name: 'Paper', low: 0, high: 1, units: 'Notebook / Printer' },
       { name: 'Design', low: 0, high: 1, units: 'Dart / Glider' },
@@ -237,20 +242,25 @@ export const EXAMPLES: ExampleDef[] = [
     },
     // Design rows from generator (4 treatments) × 6 replicates = 24 runs.
     // Generator order per replicate: T1 (-,-,+), T3 (-,+,-), T2 (+,-,-), T4 (+,+,+)
-    // Replicates 1-3 = Location L1 / Height H1 rounds 1-3; reps 4-6 = L2 / H2 rounds 1-3.
+    // Reps 1–3 = Location L1 / Height H1 rounds 1–3 (block 1); reps 4–6 = L2 / H2 (block 2).
+    // Tinker run # = (rep − 1) × 4 + position within rep.
     observedData: [
       [
-        // Rep 1 (L1/H1 round 1): T1, T3, T2, T4
+        // Rep 1 (L1/H1, round 1) — runs 1–4: T1, T3, T2, T4
         39, 42, 59, 47,
-        // Rep 2 (L1/H1 round 2)
+        // Rep 2 (L1/H1, round 2) — runs 5–8
+        // Run 5 (T1) = 28 in. — paperclip detached mid-flight (assignable cause, NOT a measurement error)
         28, 33, 63, 45,
-        // Rep 3 (L1/H1 round 3)
+        // Rep 3 (L1/H1, round 3) — runs 9–12
         48, 40, 69, 41,
-        // Rep 4 (L2/H2 round 1)
+        // Rep 4 (L2/H2, round 1) — runs 13–16
         32, 18.2, 12.6, 73.3,
-        // Rep 5 (L2/H2 round 2) — note T2 = 228.5 hit a wall, T1 = 81 hit a ceiling
+        // Rep 5 (L2/H2, round 2) — runs 17–20
+        // Run 17 (T1) = 81 in. — hit ceiling (assignable cause)
+        // Run 19 (T2) = 228.5 in. — hit wall, almost 4× the next-largest reading (assignable cause)
         81, 26.5, 228.5, 41.5,
-        // Rep 6 (L2/H2 round 3) — T1 = 99.5 hit a ceiling
+        // Rep 6 (L2/H2, round 3) — runs 21–24
+        // Run 21 (T1) = 99.5 in. — hit ceiling (assignable cause)
         99.5, 118.6, 24.9, 38.3,
       ],
     ],
@@ -258,10 +268,13 @@ export const EXAMPLES: ExampleDef[] = [
       { name: 'Distance', goal: 'maximize', lower: 10, upper: 250, importance: 5 },
     ],
     takeaways: [
-      'Open Analysis → ANOVA: with only 3 factors and a half fraction, all 3 main effects are estimable but each is aliased with a two-factor interaction (A↔BC, B↔AC, C↔AB)',
-      'Diagnostics will flag the two ceiling-strike runs in Replicate 5 — a real experiment would discard or rerun them',
-      'Optimize for maximum distance — the winning corner under the principal fraction is Printer + Glider + Paperclip (T4), but the L2 noise makes the estimate uncertain',
-      'Compare with the larger 2⁴ factorial example to see how more runs and a 4th factor (environment) sharpen the conclusions',
+      'EXPECT a weak fit: ANOVA will show no significant main effects, low R², poor predictive metrics, and non-normal residuals. The data is honest — the model is just under-specified for the noise present in this dataset',
+      'BLOCKING LIMITATION — Location and Height are fully confounded and act as a single block, but Tinker does not yet expose an explicit block factor, so this analysis attributes block-level variance to residual error. Visually compare runs 1–12 (block L1/H1) to runs 13–24 (block L2/H2) on the residuals-vs-run plot — the variance jump is structural, not random',
+      'FOUR ASSIGNABLE-CAUSE RUNS were logged in the experimenter\'s notebook and should be flagged in the report, not just diagnosed statistically: run 5 (paperclip detached), run 17 (hit ceiling), run 19 (hit wall, the dominant outlier), and run 21 (hit ceiling). "Hit wall" is a process-control failure, not a noise event — the right action is to refit excluding these four runs and compare conclusions',
+      'OUTLIER vs SPECIAL-CAUSE distinction matters. Tinker\'s diagnostics will correctly flag run 19 via the studentized residual, but the *narrative* should always cross-reference the run notes. A 228 in. flight that "hit a wall" is not a 228 in. flight',
+      'BOX–COX will recommend a log-ish transform — that\'s the model trying to absorb the right-skew created by run 19. With the four assignable-cause runs removed, the transform recommendation typically goes away',
+      'ALIASING — under I = +ABC, every main effect is aliased with the corresponding two-factor interaction (A↔BC, B↔AC, C↔AB). Apparent main effects in this design could equally well be interactions; that\'s the price of the half-fraction',
+      'DATA GOVERNANCE LESSON — the source spreadsheet had decoded text labels (e.g. "Printer; Dart") that disagreed with the numeric coded values for several rows in block L2. Always trust the coded factor columns over hand-entered descriptions, and consider generating the decoded labels from the coded values rather than re-typing them',
     ],
   },
   {
