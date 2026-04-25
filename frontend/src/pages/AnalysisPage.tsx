@@ -575,10 +575,11 @@ function ModelGraphsTab({
       grid_size: 28,
     })
       .then(setGrid)
-      .catch((e: Error) => {
+      .catch((e: any) => {
         setGrid(null)
-        setGridError(e.message || 'Failed to compute prediction grid')
-        console.error('predictGrid (contour/surface) failed:', e)
+        const detail = e?.response?.data?.detail ?? e?.message ?? 'Failed to compute prediction grid'
+        setGridError(typeof detail === 'string' ? detail : JSON.stringify(detail))
+        console.error('predictGrid (contour/surface) failed:', e?.response?.data ?? e)
       })
     predictGrid({
       factors: project.factors,
@@ -689,10 +690,10 @@ function PaneSkeleton() {
 
 function PaneError({ message }: { message: string }) {
   return (
-    <div className="h-full grid place-items-center p-4">
-      <div className="max-w-sm rounded-md border border-destructive/40 bg-destructive/5 p-3 text-[12px] text-destructive">
-        <div className="font-semibold mb-1">Could not compute prediction grid</div>
-        <div className="text-destructive/80 break-words">{message}</div>
+    <div className="h-full overflow-auto p-3">
+      <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-[11px] text-destructive">
+        <div className="font-semibold mb-1 text-[12px]">Could not compute prediction grid</div>
+        <pre className="text-destructive/80 whitespace-pre-wrap break-words font-mono text-[10.5px] leading-snug">{message}</pre>
       </div>
     </div>
   )
