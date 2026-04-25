@@ -556,12 +556,14 @@ function ModelGraphsTab({
   const debouncedTool = useDebouncedFactors(tool, 200)
   const [grid, setGrid] = useState<PredictionGridResponse | null>(null)
   const [perturb, setPerturb] = useState<PredictionGridResponse | null>(null)
+  const [gridError, setGridError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!analysis || !response || !debouncedTool || !debouncedTool.xFactor) return
     const xF = debouncedTool.xFactor
     const yF = debouncedTool.yFactor || project.factors.find((f) => f.name !== xF)?.name || null
-    void predictGrid({
+    setGridError(null)
+    predictGrid({
       factors: project.factors,
       coded_matrix: codedMatrix,
       response: response.data,
@@ -571,8 +573,14 @@ function ModelGraphsTab({
       held_constant: debouncedTool.values,
       held_constant_units: 'coded',
       grid_size: 28,
-    }).then(setGrid)
-    void predictGrid({
+    })
+      .then(setGrid)
+      .catch((e: Error) => {
+        setGrid(null)
+        setGridError(e.message || 'Failed to compute prediction grid')
+        console.error('predictGrid (contour/surface) failed:', e)
+      })
+    predictGrid({
       factors: project.factors,
       coded_matrix: codedMatrix,
       response: response.data,
@@ -582,7 +590,12 @@ function ModelGraphsTab({
       held_constant: debouncedTool.values,
       held_constant_units: 'coded',
       grid_size: 28,
-    }).then(setPerturb)
+    })
+      .then(setPerturb)
+      .catch((e: Error) => {
+        setPerturb(null)
+        console.error('predictGrid (perturbation) failed:', e)
+      })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedTool?.xFactor, debouncedTool?.yFactor, JSON.stringify(debouncedTool?.values), analysis?.terms?.join(',')])
 
@@ -600,6 +613,8 @@ function ModelGraphsTab({
   const yF = tool?.yFactor || project.factors[1]?.name || ''
   const zLabel = response.name
 
+  const fallback = gridError ? <PaneError message={gridError} /> : <PaneSkeleton />
+
   const PANES = [
     {
       key: 'contour',
@@ -611,7 +626,7 @@ function ModelGraphsTab({
           designPoints={grid.design_points} currentPoint={grid.current_point}
           compact
         />
-      ) : <PaneSkeleton />,
+      ) : fallback,
     },
     {
       key: 'surface',
@@ -623,7 +638,7 @@ function ModelGraphsTab({
           designPoints={grid.design_points} currentPoint={grid.current_point}
           compact
         />
-      ) : <PaneSkeleton />,
+      ) : fallback,
     },
     {
       key: 'interaction',
@@ -633,7 +648,7 @@ function ModelGraphsTab({
           x={grid.x_values} y={grid.y_values!} z={grid.z_values}
           xLabel={xF} yLabel={yF} zLabel={zLabel}
         />
-      ) : <PaneSkeleton />,
+      ) : fallback,
     },
     {
       key: 'perturbation',
@@ -641,7 +656,7 @@ function ModelGraphsTab({
       subtitle: 'one-factor-at-a-time',
       content: perturb?.perturbation ? (
         <PerturbationPlot data={perturb.perturbation} yLabel={zLabel} />
-      ) : <PaneSkeleton />,
+      ) : fallback,
     },
   ]
 
@@ -670,4 +685,15 @@ function ModelGraphsTab({
 
 function PaneSkeleton() {
   return <Skeleton variant="plot" className="h-full" />
+}
+
+function PaneError({ message }: { message: string }) {
+  return (
+    <div className="h-full grid place-items-center p-4">
+      <div className="max-w-sm rounded-md border border-destructive/40 bg-destructive/5 p-3 text-[12px] text-destructive">
+        <div className="font-semibold mb-1">Could not compute prediction grid</div>
+        <div className="text-destructive/80 break-words">{message}</div>
+      </div>
+    </div>
+  )
 }
