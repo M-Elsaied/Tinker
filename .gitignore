@@ -1,0 +1,32 @@
+node_modules/
+dist/
+build/
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.DS_Store
+.env
+.env.local
+.env.*.local
+.idea/
+.vscode/
+*.log
+*.tmp
+
+# Local tooling / scratch
+.claude/
+.cursor/
+.aider*
+.github-copilot/
+
+# Project-specific
+package-lock.json.bak
+*.local

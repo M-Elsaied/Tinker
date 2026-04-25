@@ -1,0 +1,17 @@
+**/node_modules
+**/dist
+**/__pycache__
+**/.pytest_cache
+**/*.pyc
+**/.venv
+**/.env
+**/.env.local
+.git
+.gitignore
+.vscode
+.idea
+*.log
+docker-compose.yml
+node_modules
+package-lock.json
+package.json
