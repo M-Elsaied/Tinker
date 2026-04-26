@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Download, FileBarChart, Loader2, Printer } from 'lucide-react'
+import { ArrowLeft, Download, FileBarChart, FileText, Loader2, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { RequireProject } from '@/components/layout/RequireProject'
 import { useProjectStore } from '@/stores/projectStore'
 import { fetchAllAnalyses, type ReportData } from '@/lib/reportFetcher'
 import { executiveSummary, keyFindingsForResponse } from '@/lib/insights'
 import { exportToPdf } from '@/lib/pdfExport'
+import { exportToWord } from '@/lib/docxExport'
 import { toast } from '@/lib/toast'
 import { cn } from '@/lib/utils'
 import { ReportShell } from '@/components/report/ReportShell'
@@ -35,6 +36,7 @@ function ReportInner() {
   const [report, setReport] = useState<ReportData | null>(null)
   const [loading, setLoading] = useState(true)
   const [exporting, setExporting] = useState(false)
+  const [exportingWord, setExportingWord] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const shellRef = useRef<HTMLDivElement>(null)
 
@@ -95,6 +97,24 @@ function ReportInner() {
     setExporting(false)
   }
 
+  const handleDownloadWord = async () => {
+    if (!report) return
+    setExportingWord(true)
+    const filename = `${project.name.replace(/\s+/g, '_')}.docx`
+    const promise = exportToWord(project, report, findingsList, goals, {
+      filename,
+      reportRoot: shellRef.current,
+      summary,
+    })
+    toast.promise(promise, {
+      loading: 'Building Word document…',
+      success: `Saved ${filename}`,
+      error: 'Word export failed',
+    })
+    try { await promise } catch { /* toast already handled */ }
+    setExportingWord(false)
+  }
+
   const findingsList = useMemo(
     () => report?.perResponse.map((p) =>
       keyFindingsForResponse(p.name, p.analysis, p.diagnostics, p.boxCox),
@@ -143,6 +163,10 @@ function ReportInner() {
           <Button size="sm" variant="outline" onClick={() => window.print()}>
             <Printer className="h-3.5 w-3.5" />
             Print
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleDownloadWord} disabled={exportingWord || loading || !report}>
+            {exportingWord ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
+            Download Word
           </Button>
           <Button size="sm" onClick={handleDownload} disabled={exporting || loading}>
             {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}

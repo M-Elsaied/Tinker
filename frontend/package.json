@@ -23,6 +23,8 @@
     "dexie": "^4.0.10",
     "dexie-react-hooks": "^1.1.7",
     "framer-motion": "^12.38.0",
+    "docx": "^9.0.0",
+    "file-saver": "^2.0.5",
     "html2pdf.js": "^0.10.2",
     "lucide-react": "^0.460.0",
     "papaparse": "^5.4.1",
@@ -41,6 +43,7 @@
     "zustand": "^5.0.1"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.7",
     "@types/papaparse": "^5.3.15",
     "@types/plotly.js-dist-min": "^2.3.4",
     "@types/react": "^18.3.12",
