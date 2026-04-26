@@ -2,6 +2,7 @@ import axios from 'axios'
 import type {
   AnalysisResponse,
   AnovaTermRow,
+  AssumptionsResponse,
   BoxCoxResponse,
   DiagnosticsResponse,
   EffectsResponse,
@@ -57,6 +58,16 @@ export async function diagnostics(req: {
   selected_terms: string[]
 }): Promise<DiagnosticsResponse> {
   const { data } = await client.post('/diagnostics/residuals', req)
+  return data
+}
+
+export async function assumptions(req: {
+  factors: Factor[]
+  coded_matrix: number[][]
+  response: (number | null)[]
+  response_name: string
+}): Promise<AssumptionsResponse> {
+  const { data } = await client.post('/diagnostics/assumptions', req)
   return data
 }
 

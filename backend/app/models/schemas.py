@@ -134,6 +134,49 @@ class DiagnosticsResponse(BaseModel):
     shapiro_p: Optional[float] = None
 
 
+class AssumptionsRequest(BaseModel):
+    factors: list[Factor]
+    coded_matrix: list[list[float]]
+    response: list[Optional[float]]
+    response_name: str = "Response"
+
+
+class FactorLevelStats(BaseModel):
+    coded_level: float                   # -1, 0, +1
+    actual_level: float                  # decoded
+    n: int
+    mean: float
+    median: float
+    std: float
+    q1: float
+    q3: float
+    min: float
+    max: float
+    values: list[float]                  # raw observations at this level
+    shapiro_stat: Optional[float] = None # per-level normality
+    shapiro_p: Optional[float] = None
+    shapiro_skipped_reason: Optional[str] = None  # if n < 3
+
+
+class FactorAssumptions(BaseModel):
+    factor_name: str
+    units: str
+    levels: list[FactorLevelStats]
+    levene_stat: Optional[float] = None  # variance homogeneity across levels
+    levene_p: Optional[float] = None
+    bartlett_stat: Optional[float] = None
+    bartlett_p: Optional[float] = None
+    homogeneity_skipped_reason: Optional[str] = None  # if any level has < 2 obs
+
+
+class AssumptionsResponse(BaseModel):
+    response_name: str
+    n_observations: int
+    overall_shapiro_stat: Optional[float] = None
+    overall_shapiro_p: Optional[float] = None
+    factors: list[FactorAssumptions]
+
+
 class BoxCoxRequest(BaseModel):
     response: list[float]
 

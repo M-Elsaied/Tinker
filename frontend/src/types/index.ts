@@ -134,6 +134,42 @@ export interface DiagnosticsResponse {
   shapiro_p: number | null
 }
 
+export interface FactorLevelStats {
+  coded_level: number
+  actual_level: number
+  n: number
+  mean: number
+  median: number
+  std: number
+  q1: number
+  q3: number
+  min: number
+  max: number
+  values: number[]
+  shapiro_stat: number | null
+  shapiro_p: number | null
+  shapiro_skipped_reason: string | null
+}
+
+export interface FactorAssumptions {
+  factor_name: string
+  units: string
+  levels: FactorLevelStats[]
+  levene_stat: number | null
+  levene_p: number | null
+  bartlett_stat: number | null
+  bartlett_p: number | null
+  homogeneity_skipped_reason: string | null
+}
+
+export interface AssumptionsResponse {
+  response_name: string
+  n_observations: number
+  overall_shapiro_stat: number | null
+  overall_shapiro_p: number | null
+  factors: FactorAssumptions[]
+}
+
 export interface DesignPointProjection {
   x: number
   y: number

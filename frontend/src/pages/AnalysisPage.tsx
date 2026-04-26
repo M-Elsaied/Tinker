@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import {
   Activity,
   BookOpen,
+  CheckCircle2,
   Layers,
   Loader2,
   RefreshCw,
@@ -36,6 +37,7 @@ import { InteractionPlot } from '@/components/plots/InteractionPlot'
 import { BoxCoxPlot } from '@/components/plots/BoxCoxPlot'
 import { ExampleBanner } from '@/components/examples/ExampleBanner'
 import { EffectsView } from '@/components/analysis/EffectsView'
+import { AssumptionsTab } from '@/components/analysis/AssumptionsTab'
 import { DiagnosticPaneContent } from '@/components/diagnostics/DiagnosticPaneContent'
 import { PaneSubTabSelector } from '@/components/diagnostics/PaneSubTabSelector'
 import type { PaneViewId } from '@/stores/uiStore'
@@ -69,7 +71,7 @@ const MODEL_LABELS: Record<ModelOrder, string> = {
   cubic: 'Cubic',
 }
 
-type AnalysisTab = 'configure' | 'effects' | 'anova' | 'diagnostics' | 'graphs'
+type AnalysisTab = 'configure' | 'effects' | 'anova' | 'assumptions' | 'diagnostics' | 'graphs'
 
 export function AnalysisPage() {
   const navigate = useNavigate()
@@ -171,6 +173,7 @@ export function AnalysisPage() {
     { id: 'configure', label: 'Configure', icon: <SlidersHorizontal className="h-3.5 w-3.5" /> },
     { id: 'effects', label: 'Effects', icon: <Sigma className="h-3.5 w-3.5" /> },
     { id: 'anova', label: 'ANOVA', icon: <BookOpen className="h-3.5 w-3.5" /> },
+    { id: 'assumptions', label: 'Assumptions', icon: <CheckCircle2 className="h-3.5 w-3.5" /> },
     { id: 'diagnostics', label: 'Diagnostics', icon: <Activity className="h-3.5 w-3.5" /> },
     { id: 'graphs', label: 'Model Graphs', icon: <Layers className="h-3.5 w-3.5" /> },
   ]
@@ -217,6 +220,15 @@ export function AnalysisPage() {
         bc={bc}
         onComputeBoxCox={refreshBoxCox}
         factors={project.factors}
+      />
+    )
+  } else if (activeTab === 'assumptions') {
+    pageContent = (
+      <AssumptionsTab
+        factors={project.factors}
+        codedMatrix={codedMatrix}
+        response={response.data}
+        responseName={response.name}
       />
     )
   } else if (activeTab === 'diagnostics') {
