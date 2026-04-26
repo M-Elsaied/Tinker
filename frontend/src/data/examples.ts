@@ -216,33 +216,34 @@ export const EXAMPLES: ExampleDef[] = [
   {
     id: 'paper-airplane-fractional',
     shortName: 'Paper airplane (fractional)',
-    name: 'Paper airplane flight distance (2³⁻¹ × Location, 24 observed runs)',
+    name: 'Paper airplane flight distance (2³⁻¹ × Block, 24 observed runs)',
     source: 'OREM 7377 lab — Elsaied (SMU, 2026)',
     difficulty: 'beginner',
     description:
-      'A 2³⁻¹ Resolution-III fractional factorial in Paper / Design / Nose, fully crossed with a 2-level Location block (L1 vs L2). Each of the 8 (treatment × location) cells is replicated 3 times for 24 flights total. A teaching example for blocking, assignable-cause investigation, and aliasing.',
+      'A 2³⁻¹ Resolution-III fractional factorial in Paper / Design / Nose, fully crossed with a 2-level Block (Location L1·H1 vs L2·H2 — fully confounded, treated as a single block). Each of the 8 (treatment × block) cells is replicated 3 times for 24 flights total. A teaching example for blocking, assignable-cause investigation, and aliasing.',
     story:
       'Three factors are hypothesised to drive paper-airplane flight distance: paper type (notebook vs printer), ' +
       'folding design (classic dart vs glider), and nose weight (none vs paperclip). The 4 principal-fraction ' +
-      'treatments (defining relation I = +ABC in A,B,C) were each flown in two different locations (L1 / H1 and ' +
-      'L2 / H2 — confounded, treated here as a single block factor) and replicated 3 rounds per cell, for 24 ' +
-      'flights measured in inches.\n\n' +
-      'Location is included as an explicit 4th regressor so the analysis can quantify how much of the variance ' +
-      'is due to environment vs. the airplane factors. Four runs also have *assignable causes* logged in the ' +
+      'treatments (defining relation I = +ABC in A,B,C) were each flown in two different environments — Location 1 ' +
+      'with Height 1 (L1·H1) and Location 2 with Height 2 (L2·H2). Because Location and Height were never varied ' +
+      'independently, they are fully confounded and enter the model as a single Block factor. Each of the 8 ' +
+      '(treatment × block) cells was replicated 3 rounds, giving 24 measured flights in inches.\n\n' +
+      'Block is included as an explicit 4th regressor so the ANOVA can quantify how much of the variance is due ' +
+      'to environment vs. the airplane factors. Four runs also have *assignable causes* logged in the ' +
       'experimenter\'s notebook (paperclip detached, hit ceiling, hit wall) — a perfect test bed for the ' +
       'difference between a statistical outlier and a known special-cause event.',
     factors: [
       { name: 'Paper', low: 0, high: 1, units: 'Notebook / Printer' },
       { name: 'Design', low: 0, high: 1, units: 'Dart / Glider' },
       { name: 'Nose', low: 0, high: 1, units: 'none / paperclip' },
-      { name: 'Location', low: 0, high: 1, units: 'L1 / L2 (block)' },
+      { name: 'Block', low: 0, high: 1, units: 'L1·H1 / L2·H2' },
     ],
     responses: [{ name: 'Distance', units: 'in' }],
     designType: 'fractional_factorial',
     designOptions: {},
-    // Custom layout: 8 unique (Paper, Design, Nose, Location) cells × 3 reps = 24 rows.
-    // Within each replicate the 8 rows go: T1L1, T3L1, T2L1, T4L1, T1L2, T3L2, T2L2, T4L2.
-    // Coded columns: Paper, Design, Nose, Location.
+    // Custom layout: 8 unique (Paper, Design, Nose, Block) cells × 3 reps = 24 rows.
+    // Within each replicate the 8 rows go: T1B1, T3B1, T2B1, T4B1, T1B2, T3B2, T2B2, T4B2.
+    // Coded columns: Paper, Design, Nose, Block.  Block −1 = L1·H1, Block +1 = L2·H2.
     customDesign: [
       // Rep 1
       [-1, -1,  1, -1],  // T1 L1
@@ -309,13 +310,13 @@ export const EXAMPLES: ExampleDef[] = [
       { name: 'Distance', goal: 'maximize', lower: 10, upper: 250, importance: 5 },
     ],
     takeaways: [
-      'LOCATION IS A REAL FACTOR HERE — switch model order to 2FI (Configure → Order) to see whether Location modifies the effect of Paper, Design, or Nose. If the Location main effect is large but its 2FIs are small, Location is acting as a pure block (variance shifter); if the 2FIs are large, the airplane factors behave differently between L1 and L2',
+      'BLOCK IS A REAL FACTOR HERE — Location and Height are fully confounded and enter the model as a single Block (L1·H1 vs L2·H2). The ANOVA will show its own row with SS, df, F, and p-value. Switch model order to 2FI (Configure → Order) to see whether Block modifies the effect of Paper, Design, or Nose. If the Block main effect is large but its 2FIs are small, Block is acting as a pure block (variance shifter); if the 2FIs are large, the airplane factors behave differently between the two environments',
       'EXPECT a weak fit on the linear model: ANOVA will show no significant airplane-factor main effects, low R², and non-normal residuals. The data is honest — the model is under-specified for the noise present in this dataset',
       'FOUR ASSIGNABLE-CAUSE RUNS were logged in the experimenter\'s notebook and should be flagged narratively, not just diagnosed statistically: run 9 (paperclip detached), run 13 (hit ceiling), run 15 (hit wall — the dominant outlier), and run 21 (hit ceiling). "Hit wall" is a process-control failure, not a noise event — refit excluding these four runs and compare conclusions',
       'OUTLIER vs SPECIAL-CAUSE distinction matters. Tinker\'s diagnostics will correctly flag run 15 via the studentized residual, but the *narrative* should always cross-reference the run notes. A 228 in. flight that "hit a wall" is not a 228 in. flight',
       'BOX–COX will recommend a log-ish transform — that\'s the model trying to absorb the right-skew created by run 15. With the four assignable-cause runs removed, the transform recommendation typically goes away',
-      'ALIASING — under I = +ABC for the airplane factors, every airplane main effect is aliased with the corresponding two-factor interaction (A↔BC, B↔AC, C↔AB). Location is independent of this aliasing — its main effect and Location-by-airplane 2FIs are clear of one another',
-      'DATA GOVERNANCE LESSON — the source spreadsheet had decoded text labels (e.g. "Printer; Dart") that disagreed with the numeric coded values for several rows in block L2. Always trust the coded factor columns over hand-entered descriptions, and consider generating the decoded labels from the coded values rather than re-typing them',
+      'ALIASING — under I = +ABC for the airplane factors, every airplane main effect is aliased with the corresponding two-factor interaction (A↔BC, B↔AC, C↔AB). Block is independent of this aliasing — its main effect and Block-by-airplane 2FIs are clear of one another',
+      'DATA GOVERNANCE LESSON — the source spreadsheet had decoded text labels (e.g. "Printer; Dart") that disagreed with the numeric coded values for several rows in the L2·H2 block. Always trust the coded factor columns over hand-entered descriptions, and consider generating the decoded labels from the coded values rather than re-typing them',
     ],
   },
   {
