@@ -43,6 +43,11 @@ export interface ExampleDef {
   // Preloaded per-row responses. If provided, overrides generateResponses.
   // Shape: observedData[responseIdx][rowIdx] matched to design rows by index.
   observedData?: number[][]
+  // Hand-built coded design, bypassing the backend generator. One row per run,
+  // values in {-1, 0, 1} matched to `factors` order. Useful when no built-in
+  // design type produces the exact layout you want (e.g. a fractional crossed
+  // with a block factor).
+  customDesign?: number[][]
   goals: {
     name: string
     goal: GoalType
@@ -211,69 +216,105 @@ export const EXAMPLES: ExampleDef[] = [
   {
     id: 'paper-airplane-fractional',
     shortName: 'Paper airplane (fractional)',
-    name: 'Paper airplane flight distance (2³⁻¹ fractional factorial, 24 observed runs)',
+    name: 'Paper airplane flight distance (2³⁻¹ × Location, 24 observed runs)',
     source: 'OREM 7377 lab — Elsaied (SMU, 2026)',
     difficulty: 'beginner',
     description:
-      'A 2³⁻¹ resolution-III fractional factorial with 6 replicates of each treatment (24 flights), spread over two location/height blocks. A teaching example for assignable-cause investigation, blocking limitations, and the value of plain-English run notes alongside numeric data.',
+      'A 2³⁻¹ Resolution-III fractional factorial in Paper / Design / Nose, fully crossed with a 2-level Location block (L1 vs L2). Each of the 8 (treatment × location) cells is replicated 3 times for 24 flights total. A teaching example for blocking, assignable-cause investigation, and aliasing.',
     story:
       'Three factors are hypothesised to drive paper-airplane flight distance: paper type (notebook vs printer), ' +
-      'folding design (classic dart vs glider), and nose weight (none vs paperclip). Only the four principal-fraction ' +
-      'treatments were flown (defining relation I = +ABC), but each was replicated six times — three rounds in ' +
-      'Location 1 / Height 1 and three rounds in Location 2 / Height 2 — for 24 measured flights in inches.\n\n' +
-      'Two things make this a useful teaching example. First, four of the 24 runs have *assignable causes* logged ' +
-      'in the experimenter\'s notebook (paperclip detached, hit ceiling, hit wall) — a perfect test bed for the ' +
-      'difference between a statistical outlier and a known special-cause event. Second, Location and Height are ' +
-      'fully confounded and should be modelled as a single block; Tinker does not yet expose an explicit block ' +
-      'factor, so the analysis underestimates how much of the L1 → L2 variance is structural. The takeaways below ' +
-      'spell out how to read the report with that limitation in mind.',
+      'folding design (classic dart vs glider), and nose weight (none vs paperclip). The 4 principal-fraction ' +
+      'treatments (defining relation I = +ABC in A,B,C) were each flown in two different locations (L1 / H1 and ' +
+      'L2 / H2 — confounded, treated here as a single block factor) and replicated 3 rounds per cell, for 24 ' +
+      'flights measured in inches.\n\n' +
+      'Location is included as an explicit 4th regressor so the analysis can quantify how much of the variance ' +
+      'is due to environment vs. the airplane factors. Four runs also have *assignable causes* logged in the ' +
+      'experimenter\'s notebook (paperclip detached, hit ceiling, hit wall) — a perfect test bed for the ' +
+      'difference between a statistical outlier and a known special-cause event.',
     factors: [
       { name: 'Paper', low: 0, high: 1, units: 'Notebook / Printer' },
       { name: 'Design', low: 0, high: 1, units: 'Dart / Glider' },
       { name: 'Nose', low: 0, high: 1, units: 'none / paperclip' },
+      { name: 'Location', low: 0, high: 1, units: 'L1 / L2 (block)' },
     ],
     responses: [{ name: 'Distance', units: 'in' }],
     designType: 'fractional_factorial',
-    designOptions: {
-      fraction: 1,
-      replicates: 6,
-      randomize: false,
-      center_points: 0,
-    },
-    // Design rows from generator (4 treatments) × 6 replicates = 24 runs.
-    // Generator order per replicate: T1 (-,-,+), T3 (-,+,-), T2 (+,-,-), T4 (+,+,+)
-    // Reps 1–3 = Location L1 / Height H1 rounds 1–3 (block 1); reps 4–6 = L2 / H2 (block 2).
-    // Tinker run # = (rep − 1) × 4 + position within rep.
+    designOptions: {},
+    // Custom layout: 8 unique (Paper, Design, Nose, Location) cells × 3 reps = 24 rows.
+    // Within each replicate the 8 rows go: T1L1, T3L1, T2L1, T4L1, T1L2, T3L2, T2L2, T4L2.
+    // Coded columns: Paper, Design, Nose, Location.
+    customDesign: [
+      // Rep 1
+      [-1, -1,  1, -1],  // T1 L1
+      [-1,  1, -1, -1],  // T3 L1
+      [ 1, -1, -1, -1],  // T2 L1
+      [ 1,  1,  1, -1],  // T4 L1
+      [-1, -1,  1,  1],  // T1 L2
+      [-1,  1, -1,  1],  // T3 L2
+      [ 1, -1, -1,  1],  // T2 L2
+      [ 1,  1,  1,  1],  // T4 L2
+      // Rep 2
+      [-1, -1,  1, -1],
+      [-1,  1, -1, -1],
+      [ 1, -1, -1, -1],
+      [ 1,  1,  1, -1],
+      [-1, -1,  1,  1],
+      [-1,  1, -1,  1],
+      [ 1, -1, -1,  1],
+      [ 1,  1,  1,  1],
+      // Rep 3
+      [-1, -1,  1, -1],
+      [-1,  1, -1, -1],
+      [ 1, -1, -1, -1],
+      [ 1,  1,  1, -1],
+      [-1, -1,  1,  1],
+      [-1,  1, -1,  1],
+      [ 1, -1, -1,  1],
+      [ 1,  1,  1,  1],
+    ],
+    // Distance per run, in the same order as customDesign above.
+    // Assignable-cause runs are flagged in the takeaways below.
     observedData: [
       [
-        // Rep 1 (L1/H1, round 1) — runs 1–4: T1, T3, T2, T4
-        39, 42, 59, 47,
-        // Rep 2 (L1/H1, round 2) — runs 5–8
-        // Run 5 (T1) = 28 in. — paperclip detached mid-flight (assignable cause, NOT a measurement error)
-        28, 33, 63, 45,
-        // Rep 3 (L1/H1, round 3) — runs 9–12
-        48, 40, 69, 41,
-        // Rep 4 (L2/H2, round 1) — runs 13–16
-        32, 18.2, 12.6, 73.3,
-        // Rep 5 (L2/H2, round 2) — runs 17–20
-        // Run 17 (T1) = 81 in. — hit ceiling (assignable cause)
-        // Run 19 (T2) = 228.5 in. — hit wall, almost 4× the next-largest reading (assignable cause)
-        81, 26.5, 228.5, 41.5,
-        // Rep 6 (L2/H2, round 3) — runs 21–24
-        // Run 21 (T1) = 99.5 in. — hit ceiling (assignable cause)
-        99.5, 118.6, 24.9, 38.3,
+        // Rep 1 — runs 1–8
+        39,    // T1 L1
+        42,    // T3 L1
+        59,    // T2 L1
+        47,    // T4 L1
+        32,    // T1 L2
+        18.2,  // T3 L2
+        12.6,  // T2 L2
+        73.3,  // T4 L2
+        // Rep 2 — runs 9–16
+        28,    // T1 L1 — paperclip detached mid-flight (run 9, assignable cause)
+        33,    // T3 L1
+        63,    // T2 L1
+        45,    // T4 L1
+        81,    // T1 L2 — hit ceiling (run 13, assignable cause)
+        26.5,  // T3 L2
+        228.5, // T2 L2 — hit wall (run 15, dominant outlier, assignable cause)
+        41.5,  // T4 L2
+        // Rep 3 — runs 17–24
+        48,    // T1 L1
+        40,    // T3 L1
+        69,    // T2 L1
+        41,    // T4 L1
+        99.5,  // T1 L2 — hit ceiling (run 21, assignable cause)
+        118.6, // T3 L2
+        24.9,  // T2 L2
+        38.3,  // T4 L2
       ],
     ],
     goals: [
       { name: 'Distance', goal: 'maximize', lower: 10, upper: 250, importance: 5 },
     ],
     takeaways: [
-      'EXPECT a weak fit: ANOVA will show no significant main effects, low R², poor predictive metrics, and non-normal residuals. The data is honest — the model is just under-specified for the noise present in this dataset',
-      'BLOCKING LIMITATION — Location and Height are fully confounded and act as a single block, but Tinker does not yet expose an explicit block factor, so this analysis attributes block-level variance to residual error. Visually compare runs 1–12 (block L1/H1) to runs 13–24 (block L2/H2) on the residuals-vs-run plot — the variance jump is structural, not random',
-      'FOUR ASSIGNABLE-CAUSE RUNS were logged in the experimenter\'s notebook and should be flagged in the report, not just diagnosed statistically: run 5 (paperclip detached), run 17 (hit ceiling), run 19 (hit wall, the dominant outlier), and run 21 (hit ceiling). "Hit wall" is a process-control failure, not a noise event — the right action is to refit excluding these four runs and compare conclusions',
-      'OUTLIER vs SPECIAL-CAUSE distinction matters. Tinker\'s diagnostics will correctly flag run 19 via the studentized residual, but the *narrative* should always cross-reference the run notes. A 228 in. flight that "hit a wall" is not a 228 in. flight',
-      'BOX–COX will recommend a log-ish transform — that\'s the model trying to absorb the right-skew created by run 19. With the four assignable-cause runs removed, the transform recommendation typically goes away',
-      'ALIASING — under I = +ABC, every main effect is aliased with the corresponding two-factor interaction (A↔BC, B↔AC, C↔AB). Apparent main effects in this design could equally well be interactions; that\'s the price of the half-fraction',
+      'LOCATION IS A REAL FACTOR HERE — switch model order to 2FI (Configure → Order) to see whether Location modifies the effect of Paper, Design, or Nose. If the Location main effect is large but its 2FIs are small, Location is acting as a pure block (variance shifter); if the 2FIs are large, the airplane factors behave differently between L1 and L2',
+      'EXPECT a weak fit on the linear model: ANOVA will show no significant airplane-factor main effects, low R², and non-normal residuals. The data is honest — the model is under-specified for the noise present in this dataset',
+      'FOUR ASSIGNABLE-CAUSE RUNS were logged in the experimenter\'s notebook and should be flagged narratively, not just diagnosed statistically: run 9 (paperclip detached), run 13 (hit ceiling), run 15 (hit wall — the dominant outlier), and run 21 (hit ceiling). "Hit wall" is a process-control failure, not a noise event — refit excluding these four runs and compare conclusions',
+      'OUTLIER vs SPECIAL-CAUSE distinction matters. Tinker\'s diagnostics will correctly flag run 15 via the studentized residual, but the *narrative* should always cross-reference the run notes. A 228 in. flight that "hit a wall" is not a 228 in. flight',
+      'BOX–COX will recommend a log-ish transform — that\'s the model trying to absorb the right-skew created by run 15. With the four assignable-cause runs removed, the transform recommendation typically goes away',
+      'ALIASING — under I = +ABC for the airplane factors, every airplane main effect is aliased with the corresponding two-factor interaction (A↔BC, B↔AC, C↔AB). Location is independent of this aliasing — its main effect and Location-by-airplane 2FIs are clear of one another',
       'DATA GOVERNANCE LESSON — the source spreadsheet had decoded text labels (e.g. "Printer; Dart") that disagreed with the numeric coded values for several rows in block L2. Always trust the coded factor columns over hand-entered descriptions, and consider generating the decoded labels from the coded values rather than re-typing them',
     ],
   },
@@ -328,18 +369,39 @@ export const EXAMPLES: ExampleDef[] = [
 ]
 
 export async function buildExampleProject(ex: ExampleDef): Promise<Project> {
-  const designResp = await generateDesign({
-    design_type: ex.designType,
-    factors: ex.factors,
-    ...ex.designOptions,
-  })
+  let designRows: import('@/types').DesignRow[]
+  let designInfo: Record<string, unknown> = {}
+
+  if (ex.customDesign) {
+    designRows = ex.customDesign.map((coded, i) => ({
+      run: i + 1,
+      std_order: i + 1,
+      coded: [...coded],
+      actual: coded.map((c, j) => {
+        const f = ex.factors[j]
+        const half = (f.high - f.low) / 2
+        const center = (f.high + f.low) / 2
+        return center + c * half
+      }),
+      point_type: coded.every((v) => v === 0) ? 'center' : 'factorial',
+    }))
+    designInfo = { custom: true, n_runs: designRows.length }
+  } else {
+    const designResp = await generateDesign({
+      design_type: ex.designType,
+      factors: ex.factors,
+      ...ex.designOptions,
+    })
+    designRows = designResp.rows
+    designInfo = designResp.info
+  }
 
   const responses = ex.responses.map((r, respIdx) => {
     let data: number[]
     if (ex.observedData) {
-      data = designResp.rows.map((_row, rowIdx) => ex.observedData![respIdx][rowIdx])
+      data = designRows.map((_row, rowIdx) => ex.observedData![respIdx][rowIdx])
     } else if (ex.generateResponses) {
-      data = designResp.rows.map((row) => ex.generateResponses!(row.coded)[respIdx])
+      data = designRows.map((row) => ex.generateResponses!(row.coded)[respIdx])
     } else {
       throw new Error(`Example "${ex.id}" must define observedData or generateResponses`)
     }
@@ -353,8 +415,8 @@ export async function buildExampleProject(ex: ExampleDef): Promise<Project> {
     updatedAt: Date.now(),
     designType: ex.designType,
     factors: ex.factors,
-    designRows: designResp.rows,
+    designRows,
     responses,
-    designInfo: { ...designResp.info, exampleId: ex.id },
+    designInfo: { ...designInfo, exampleId: ex.id },
   }
 }
